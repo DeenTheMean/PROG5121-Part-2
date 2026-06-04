@@ -80,7 +80,7 @@ public class Messenger_App {
                     System.out.println(Login.registerUser("RegisterSuccess"));
                     
                     // User is prompted to log in immediately after registering (uses the promptLogin method)
-                    System.out.println("\nWelcome, " + username + "! You can now log in with your username and password.");
+                    System.out.println("\nWelcome " + username + " it is great to see you.");
                     System.out.println("Redirecting to login page...\n");
                     promptLogin(scanner, users);
                     break;
@@ -313,7 +313,7 @@ public class Messenger_App {
                 case "InvalidPassword" -> "Password is not correctly formatted; please ensure that the " +
                                           "password contains at least eight characters, a capital letter, " +
                                           "a number, and a special character.";
-                case "RegisterSuccess" -> "\nRegistered successfully!";
+                case "RegisterSuccess" -> "\nRegistered successfully.";
                 default -> "Invalid case.";
             };
         }

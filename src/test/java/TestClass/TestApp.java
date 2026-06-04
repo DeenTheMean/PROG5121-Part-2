@@ -4,6 +4,7 @@
  */
 package TestClass;
 
+import com.mycompany.messenger_app.Messenger_App.Login;
 import com.mycompany.messenger_app.Messenger_App.Message;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,6 +14,72 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Deen
  */
 public class TestApp {
+    
+    // ========== Username format tests ==========
+    
+    @Test
+    public void testUsernameIncorrectFormatMessage() {
+        String result = Login.registerUser("InvalidUsername");
+        assertEquals("Username is not correctly formatted; please ensure that " +
+                     "your username contains an underscore and is no more than " +
+                     "five characters in length.", result);
+    }
+    
+    @Test
+    public void testUsernameCorrectFormat() {
+        assertTrue(Login.checkUsername("kyl_1"));
+    }
+    
+    @Test
+    public void testUsernameIncorrectFormat() {
+        assertFalse(Login.checkUsername("kyle!!!!!!!"));
+    }
+    
+    // ========== Password format tests ==========
+    
+    @Test
+    public void testPasswordIncorrectFormatMessage() {
+        String result = Login.registerUser("InvalidPassword");
+        assertEquals("Password is not correctly formatted; please ensure that the " +
+                     "password contains at least eight characters, a capital letter, " +
+                     "a number, and a special character.", result);
+    }
+    
+    @Test
+    public void testPasswordCorrectFormat() {
+        assertTrue(Login.checkPasswordComplexity("Ch&&sec@ke99!"));
+    }
+    
+    @Test
+    public void testPasswordIncorrectFormat() {
+        assertFalse(Login.checkPasswordComplexity("password"));
+    }
+    
+    // ========== Cellphone number format tests
+         
+    @Test
+    public void testCellNoCorrectFormat() {
+        assertTrue(Login.checkCellPhoneNumber("+27838968976"));
+    }
+    
+    @Test
+    public void testCellNoIncorrectFormat() {
+        assertFalse(Login.checkCellPhoneNumber("08966553"));
+    }
+    
+    // ========== Login tests ==========
+    
+    @Test
+    public void testLoginSuccess() {
+        Login user = new Login("kyl_1", "Ch&&sec@ke99!", "+27838968976");
+        assertTrue(user.loginUser("Ch&&sec@ke99!"));
+    }
+    
+    @Test
+    public void testLoginFailure() {
+        Login user = new Login("kyl_1", "Ch&&sec@ke99!", "+27838968976");
+        assertFalse(user.loginUser("password"));
+    }
     
     // ========== Message length tests ==========
     
