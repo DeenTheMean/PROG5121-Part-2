@@ -240,46 +240,34 @@ public class Messenger_App {
  
                         // Create the message object
                         Message msg = new Message(messageCounter, recipient, messageText);
- 
-                        System.out.println("\nMessage ID   : " + msg.getMessageID());
-                        System.out.println("Message Hash : " + msg.getMessageHash());
- 
-                        // Ask what to do with the message
-                        System.out.println("\nWhat would you like to do?");
-                        System.out.println("1. Send Message");
-                        System.out.println("2. Disregard Message");
-                        System.out.println("3. Store Message to send later");
-                        System.out.print("Choose: ");
- 
-                        int action = 0;
-                        while(action < 1 || action > 3) {
-                            try {
-                                action = scanner.nextInt();
-                                scanner.nextLine();
-                                
-                                if(action < 1 || action > 3) {
-                                    System.out.println("Please enter 1, 2, or 3.");
-                                }
-                            } catch (NumberFormatException e) {
-                                System.out.println("Please enter 1, 2, or 3.");
-                            }
+                        String[] messageOptions2 = {"Send message", "Disregard message", "Store message to send later"};
+
+                        int action = JOptionPane.showOptionDialog(null, "Message ID: " + msg.getMessageID() +
+                                                                  "\nMessage Hash: " + msg.getMessageHash() +  
+                                                                  "\n\nWhat would you like to do?", "QuickChat",
+                                                                  JOptionPane.YES_NO_CANCEL_OPTION,
+                                                                  JOptionPane.PLAIN_MESSAGE,
+                                                                  null, messageOptions2, -2);
+
+                        if(action == -1) {
+                            messageCounter = 0;
+                            continue outerLoop;
                         }
- 
-                        System.out.println(msg.sentMessage(action));
+                        
+                        JOptionPane.showMessageDialog(null, msg.sentMessage(action), "QuickChat", JOptionPane.INFORMATION_MESSAGE);
  
                         // Decrement the message counter if the message is disregarded
-                        if(action == 2) {
+                        if(action == 1) {
                             messageCounter--;
                         }
                     }
- 
-                    // Show total number of messages sent
-                    System.out.println("\nTotal messages sent: " + Message.returnTotalMessages());
-                    
+                                      
                     // Show summary of message details
-                    if(Message.returnTotalMessages() > 0) {
-                        System.out.println("\n" + Message.printMessages());
-                    }
+                    JOptionPane.showMessageDialog(null, "Total messages sent: " +
+                                                  Message.returnTotalMessages() + "\n" +
+                                                  Message.printMessages(),
+                                                  "QuickChat", JOptionPane.INFORMATION_MESSAGE);
+                    
                 }
                 case 1 -> {
                     JOptionPane.showMessageDialog(null, "Coming soon...", "QuickChat", JOptionPane.INFORMATION_MESSAGE);
@@ -436,20 +424,20 @@ public class Messenger_App {
         // Deals with the message choicea
         public String sentMessage(int choice) {
             switch (choice) {
-                case 1 -> {
+                case 0 -> {
                     sentMessages.add(this);
                     totalMessagesSent++;
-                    return "\nMessage successfully sent.";
+                    return "Message successfully sent.";
+                }
+                case 1 -> {
+                    return "Message disregarded.";
                 }
                 case 2 -> {
-                    return "\nPress 0 to delete the message.";
-                }
-                case 3 -> {
                     storeMessage();
-                    return "\nMessage successfully stored.";
+                    return "Message successfully stored.";
                 }
                 default -> {
-                    return "\nInvalid option.";
+                    return "Invalid input.";
                 }
             }
         }
@@ -464,10 +452,10 @@ public class Messenger_App {
             
             for(Message m : sentMessages) {
                 stringBuilder.append("-----------------------------\n");
-                stringBuilder.append("Message ID   : ").append(m.messageID).append("\n");
-                stringBuilder.append("Message Hash : ").append(m.messageHash).append("\n");
-                stringBuilder.append("Recipient    : ").append(m.recipient).append("\n");
-                stringBuilder.append("Message      : ").append(m.messageText).append("\n");
+                stringBuilder.append("Message ID: ").append(m.messageID).append("\n");
+                stringBuilder.append("Message Hash: ").append(m.messageHash).append("\n");
+                stringBuilder.append("Recipient: ").append(m.recipient).append("\n");
+                stringBuilder.append("Message: ").append(m.messageText).append("\n");
             }
             stringBuilder.append("-----------------------------");
             
