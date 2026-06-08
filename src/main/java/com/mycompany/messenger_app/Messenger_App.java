@@ -20,16 +20,16 @@ public class Messenger_App {
         Scanner scanner = new Scanner(System.in);
         ArrayList<Login> users = new ArrayList<>();
         int selection = -2;
-        String[] options = {"Register user", "Log in", "Quit"};
+        String[] mainOptions = {"Register user", "Log in", "Quit"};
     
         // Main menu reappears after each case unless program is terminated
         while(running) {
     
-            selection = JOptionPane.showOptionDialog(null, "Welcome to QuickChat!",
+            selection = JOptionPane.showOptionDialog(null, "Main Menu",
                                                      "QuickChat",
                                                      JOptionPane.YES_NO_CANCEL_OPTION,
                                                      JOptionPane.PLAIN_MESSAGE,
-                                                     null, options, -2);
+                                                     null, mainOptions, -2);
 
             switch(selection) {
                 case 0 -> {                   
@@ -92,7 +92,7 @@ public class Messenger_App {
                     // User is prompted to log in immediately after registering (uses the promptLogin method)
                     JOptionPane.showMessageDialog(null, "Welcome, " + username + ". It is great to see you!\nRedirecting to login page...",
                                                   "QuickChat", JOptionPane.PLAIN_MESSAGE);
-                    promptLogin(scanner, users);
+                    promptLogin(users);
                     break;
                 }
                 case 1 -> {
@@ -103,7 +103,7 @@ public class Messenger_App {
                         break;
                     }
                     
-                    promptLogin(scanner, users);
+                    promptLogin(users);
                     break;
                 }
                 case 2, -1 -> {
@@ -120,21 +120,29 @@ public class Messenger_App {
     }
     
     // Searches ArrayList for existing user with the given username and password
-    private static void promptLogin(Scanner scanner, ArrayList<Login> users){
-        System.out.print("Enter username: ");
-        String enteredUsername = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String enteredPassword = scanner.nextLine();
+    private static void promptLogin(ArrayList<Login> users){
+        String enteredUsername = JOptionPane.showInputDialog(null, "Enter your username.", "Log In", JOptionPane.PLAIN_MESSAGE);
+        
+        if(enteredUsername == null) {
+            return;
+        }
+        
+        String enteredPassword = JOptionPane.showInputDialog(null, "Enter your password.", "Log In", JOptionPane.PLAIN_MESSAGE);
+        
+        if(enteredPassword == null) {
+            return;
+        }
         
         Login user = users.stream()
-                  .filter(u -> u.getUsername().equals(enteredUsername))
-                  .findFirst()
-                  .orElse(null);
+                     .filter(u -> u.getUsername().equals(enteredUsername))
+                     .findFirst().orElse(null);
         
         boolean loginStatus = user != null && user.loginUser(enteredPassword);
         // Prints message (using the returnLoginStatus method) if the user is found or details are incorrect
-        System.out.println(user != null ? user.returnLoginStatus(loginStatus) : "\nUser not found.");
+        JOptionPane.showMessageDialog(null, user != null ? user.returnLoginStatus(loginStatus) : "\nUser not found.",
+                                      "Log In", JOptionPane.PLAIN_MESSAGE);
         
+        Scanner scanner = new Scanner(System.in);
         // If login was successful, move on to messaging stage
         if(loginStatus) {
             startMessaging(scanner);           
@@ -142,80 +150,91 @@ public class Messenger_App {
     }
     
     private static void startMessaging(Scanner scanner) {
-        
-        System.out.println("\nWelcome to QuickChat.");
- 
         // User decides how many messages they want to send
         int numMessages = 0;
-        while(numMessages <= 0) {
-            System.out.print("\nHow many messages would you like to send?: ");
-            
+        while(numMessages <= 0) {          
             // Input validation
             try {
-                numMessages = scanner.nextInt();
-                
-                if(numMessages <= 0){
-                    System.out.println("Please enter a number greater than 0.");
+                numMessages = Integer.parseInt(JOptionPane
+                                               .showInputDialog(null,
+                                               "Welcome to QuickChat!\n\nHow many messages would you like to send?",
+                                               "QuickChat", JOptionPane.PLAIN_MESSAGE));
+                                
+                if(numMessages <= 0) {
+                    JOptionPane.showMessageDialog(null, "Please enter a number greater than 0.", "QuickChat", JOptionPane.WARNING_MESSAGE);
                 }
             }catch(NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a whole number.");
+                JOptionPane.showMessageDialog(null, "Please enter a whole number.", "QuickChat", JOptionPane.WARNING_MESSAGE);
             }
         }
 
         int messageCounter = 0;
         boolean chatRunning = true;
+        String[] messageOptions = {"Send messages", "Show recently sent messages", "Quit"};
  
         // Program runs until the user chooses to quit
-        while(chatRunning) {
-            System.out.println("\n============ QuickChat Menu ============");
-            System.out.println("1. Send Messages");
-            System.out.println("2. Show recently sent messages");
-            System.out.println("3. Quit");
-            
-            System.out.print("Select an option (1, 2, 3): ");
-            int selection = scanner.nextInt();
-            scanner.nextLine();
+        outerLoop:
+        while(chatRunning) {        
+           int selection = JOptionPane.showOptionDialog(null, "Messaging Menu",
+                                                        "QuickChat",
+                                                        JOptionPane.YES_NO_CANCEL_OPTION,
+                                                        JOptionPane.PLAIN_MESSAGE,
+                                                        null, messageOptions, -2);
 
             switch(selection) {
-                case 1 -> {
+                case 0 -> {
                     // Send user back to the menu if they've reached their message limit
                     if(messageCounter >= numMessages) {
-                        System.out.println("\nYou have reached your message limit of " + numMessages + "!");
+                        JOptionPane.showMessageDialog(null, "You have reached your message limit of " + numMessages + "!",
+                                                      "QuickChat", JOptionPane.WARNING_MESSAGE);
                         break;
                     }
  
                     // Send messages until the chosen limit
                     while(messageCounter < numMessages) {
                         messageCounter++;
-                        System.out.println("\n====== Message " + messageCounter + " of " + numMessages + " ======");
  
                         // Get and validate recipient number
                         String recipient = "";
                         while(true) {
-                            System.out.print("Enter recipient cell number (+27XXXXXXXXX): ");
-                            recipient = scanner.nextLine();
+                            recipient = JOptionPane.showInputDialog(null, "Message " + messageCounter + " of " + numMessages +
+                                                                    "\n\nEnter recipient cell number (e.g. +27XXXXXXXXX).",
+                                                                    "QuickChat", JOptionPane.PLAIN_MESSAGE);
                             
-                            String recipientCheck = Message.checkRecipientCell(recipient);
-                            System.out.println(recipientCheck);
+                            if(recipient == null) {
+                                messageCounter = 0;
+                                continue outerLoop;
+                            }
+                            
+                            String recipientCheck = Message.checkRecipientCell(recipient);                    
                             
                             if(recipientCheck.equals("Cell phone number successfully captured.")) {
+                                JOptionPane.showMessageDialog(null, recipientCheck, "QuickChat", JOptionPane.INFORMATION_MESSAGE);
                                 break;
+                            }else {
+                                JOptionPane.showMessageDialog(null, recipientCheck, "QuickChat", JOptionPane.WARNING_MESSAGE);
                             }
                         }
  
                         // Get and validate the message
                         String messageText = "";
                         while(true) {
-                            System.out.print("\nEnter your message (max 250 characters): ");
-                            messageText = scanner.nextLine();
+                            messageText = JOptionPane.showInputDialog(null, "Message " + messageCounter + " of " + numMessages +
+                                                                    "\n\nEnter your message (max 250 characters).",
+                                                                    "QuickChat", JOptionPane.PLAIN_MESSAGE);
+                            
+                            if(messageText == null) {
+                                messageCounter = 0;
+                                continue outerLoop;
+                            }
                             
                             String lengthCheck = Message.checkMessageLength(messageText);
                             
                             if(lengthCheck.equals("Message ready to send.")) {
-                                System.out.println("Message ready to send.");
+                                JOptionPane.showMessageDialog(null, lengthCheck, "QuickChat", JOptionPane.INFORMATION_MESSAGE);
                                 break;
                             }else {
-                                System.out.println(lengthCheck);
+                                JOptionPane.showMessageDialog(null, lengthCheck, "QuickChat", JOptionPane.WARNING_MESSAGE);
                             }
                         }
  
@@ -262,18 +281,18 @@ public class Messenger_App {
                         System.out.println("\n" + Message.printMessages());
                     }
                 }
-                case 2 -> {
-                    System.out.println("\nComing Soon.");
+                case 1 -> {
+                    JOptionPane.showMessageDialog(null, "Coming soon...", "QuickChat", JOptionPane.INFORMATION_MESSAGE);
                 }
-                case 3 -> {
-                    System.out.println("\nExiting... Come back soon!");
-                    scanner.close();
+                case 2, -1 -> {
+                    JOptionPane.showMessageDialog(null, "Exiting... Come back soon!", "Quit",
+                                                  JOptionPane.INFORMATION_MESSAGE);
                     
                     chatRunning = false;
                     running = false;
                 }
                 default -> {
-                    System.out.println("Invalid option. Please choose 1, 2, or 3.");
+                    System.out.println("Invalid input.");
                 }
             }
         }
