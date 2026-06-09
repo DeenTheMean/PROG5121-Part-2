@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
- */
 package TestClass;
 
 import com.mycompany.messenger_app.Messenger_App.Login;
@@ -16,15 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestApp {
     
     // ========== Username format tests ==========
-    /*
-    @Test
-    public void testUsernameIncorrectFormatMessage() {
-        String result = Login.registerUser("InvalidUsername");
-        assertEquals("Username is not correctly formatted; please ensure that " +
-                     "your username contains an underscore and is no more than " +
-                     "five characters in length.", result);
-    }
-    */
+
     @Test
     public void testUsernameCorrectFormat() {
         assertTrue(Login.checkUsername("kyl_1"));
@@ -36,15 +24,7 @@ public class TestApp {
     }
     
     // ========== Password format tests ==========  
-    /*
-    @Test
-    public void testPasswordIncorrectFormatMessage() {
-        String result = Login.registerUser("InvalidPassword");
-        assertEquals("Password is not correctly formatted; please ensure that the " +
-                     "password contains at least eight characters, a capital letter, " +
-                     "a number, and a special character.", result);
-    }
-    */   
+
     @Test
     public void testPasswordCorrectFormat() {
         assertTrue(Login.checkPasswordComplexity("Ch&&sec@ke99!"));
@@ -178,8 +158,8 @@ public class TestApp {
         // If the message is sent
         Message msg = new Message(1, "+27718693002", "Hi Mike, can you join us for dinner tonight?");
         
-        String result = msg.sentMessage(1);
-        assertEquals("\nMessage successfully sent.", result);
+        String result = msg.sentMessage(0);
+        assertEquals("Message successfully sent.", result);
         assertEquals(1, Message.returnTotalMessages());
     }
  
@@ -188,8 +168,8 @@ public class TestApp {
         // If the message is deletted 
         Message msg = new Message(1, "+27718693002", "Hi Mike, can you join us for dinner tonight?");
         
-        String result = msg.sentMessage(2);
-        assertEquals("\nPress 0 to delete the message.", result);
+        String result = msg.sentMessage(1);
+        assertEquals("Message disregarded.", result);
     }
  
     @Test
@@ -197,7 +177,7 @@ public class TestApp {
         // If the message is stored
         Message msg = new Message(1, "+27718693002", "Hi Mike, can you join us for dinner tonight?");
         
-        String result = msg.sentMessage(3);
-        assertEquals("\nMessage successfully stored.", result);
+        String result = msg.sentMessage(2);
+        assertEquals("Message successfully stored.", result);
     }  
 }
