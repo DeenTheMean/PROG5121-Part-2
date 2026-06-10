@@ -298,8 +298,8 @@ public class Messenger_App {
                                                              "Filter by recipient", "Delete a message",
                                                              "Cancel"};
 
-                            int storedMessageAction = JOptionPane.showOptionDialog(null, Message.printStoredMessages(),
-                                                                                   "Stored Messages",
+                            int storedMessageAction = JOptionPane.showOptionDialog(null, "All stored messages:\n\n" +
+                                                                                   Message.printStoredMessages(), "Stored Messages",
                                                                                    JOptionPane.DEFAULT_OPTION,
                                                                                    JOptionPane.PLAIN_MESSAGE,
                                                                                    null, storedMessageOptions, -2);
@@ -587,6 +587,12 @@ public class Messenger_App {
         }
         
         public static void displayLongestStoredMessage() {
+            if (storedMessages.isEmpty()){
+                JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
+                                              "Stored Messages", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
             String longestMessage = "";
             
             for (Message m : storedMessages) {
@@ -600,12 +606,29 @@ public class Messenger_App {
         }
         
         public static void searchMessageID() {
-            boolean flag = false;            
-            String searchID = JOptionPane.showInputDialog(null, "Enter the Message ID of the message you'd like to search for.",
-                                                          "Stored Messages", JOptionPane.PLAIN_MESSAGE);
-            
-            if (searchID == null) {
+            if (storedMessages.isEmpty()){
+                JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
+                                              "Stored Messages", JOptionPane.WARNING_MESSAGE);
                 return;
+            }
+            
+            boolean flag = false;
+            String searchID = "";
+
+            while (true) {
+                searchID = JOptionPane.showInputDialog(null, "Enter the Message ID of the message you'd like to search for.",
+                                                              "Stored Messages", JOptionPane.PLAIN_MESSAGE);
+
+                if (searchID == null) {
+                    return;
+                } 
+
+                if (searchID.length() == 10) {
+                    break;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Message ID must be 10 characters long. Please try again.",                                            
+                                                  "Stored Messages", JOptionPane.WARNING_MESSAGE);
+                }
             }
             
             for (Message m : storedMessages) {
@@ -624,6 +647,12 @@ public class Messenger_App {
         }
         
         public static void searchRecipientMessages() {
+            if (storedMessages.isEmpty()){
+                JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
+                                              "Stored Messages", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
             StringBuilder stringBuilder = new StringBuilder();
             boolean flag = false;
             String searchRecipient = "";
@@ -669,7 +698,27 @@ public class Messenger_App {
         }
         
         public static void deleteStoredMessage() {
+            if (storedMessages.isEmpty()){
+                JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
+                                              "Stored Messages", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             
+            String searchHash = JOptionPane.showInputDialog(null, "Enter the Message Hash of the stored message you'd like to delete.\n\n" +
+                                                            "Hint: A Message Hash looks like this -> 00:1:FIRSTLAST",
+                                                            "Stored Messages", JOptionPane.PLAIN_MESSAGE);
+            
+            if (searchHash == null) {
+                return;
+            }
+            
+            if (storedMessages.removeIf(m -> m.messageHash.equals(searchHash))) {
+                JOptionPane.showMessageDialog(null, "Message successfully deleted!",                                            
+                                              "Stored Messages", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Message with hash of " + searchHash + " not found.",                                            
+                                              "Stored Messages", JOptionPane.WARNING_MESSAGE);
+            }        
         }
  
         // Returns the message ID
