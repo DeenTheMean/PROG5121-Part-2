@@ -290,14 +290,17 @@ public class Messenger_App {
                     
                 }
                 case 1 -> {
+                    // This code only runs if there are stored messages
                     if (!storedMessages.isEmpty()) {
                         boolean storedMessagesRunning = true;
 
                         while (storedMessagesRunning) {
+                            // Array that holds the menu options for stored messages
                             String[] storedMessageOptions = {"Show longest message", "Search for a message",
                                                              "Filter by recipient", "Delete a message",
                                                              "Cancel"};
 
+                            // The details of all stored messages are shown on this menu
                             int storedMessageAction = JOptionPane.showOptionDialog(null, "All stored messages:\n\n" +
                                                                                    Message.printStoredMessages(), "Stored Messages",
                                                                                    JOptionPane.DEFAULT_OPTION,
@@ -306,18 +309,26 @@ public class Messenger_App {
 
                             switch (storedMessageAction) {
                                 case 0 -> {
+                                    // A method is called to display the longest stored message
                                     Message.displayLongestStoredMessage();
                                 }
                                 case 1 -> {
+                                    // A method is called to prompt the user to search for a message
+                                    // using the Message ID
                                     Message.searchMessageID();
                                 }
                                 case 2 -> {
+                                    // A method is called to prompt the user to search for messages
+                                    // stored for a specific recipient
                                     Message.searchRecipientMessages();
                                 }
                                 case 3 -> {
+                                    // A method is called to prompt the user to delete a message
+                                    // using the Message Hash
                                     Message.deleteStoredMessage();
                                 }
                                 case 4, -1 -> {
+                                    // Exits this loop and returns to the previous menu
                                     storedMessagesRunning = false;
                                     continue outerLoop;
                                 }
@@ -328,6 +339,7 @@ public class Messenger_App {
                             }
                         }
                     } else {
+                        // Message that is displayed if there are no stored messages
                         JOptionPane.showMessageDialog(null, "You haven't stored any messages yet.",
                                                       "Stored Messages", JOptionPane.INFORMATION_MESSAGE);
                         continue outerLoop;
@@ -423,6 +435,7 @@ public class Messenger_App {
         }
     }
    
+    // Class that handles the messaging process
     public static class Message {
         private String messageID;
         private int messageNumber;
@@ -521,6 +534,7 @@ public class Messenger_App {
                 stringBuilder.append("-----------------------------\n");
                 stringBuilder.append("Message ID: ").append(m.messageID).append("\n");
                 stringBuilder.append("Message Hash: ").append(m.messageHash).append("\n");
+                stringBuilder.append("Sender: ").append(Login.getPhoneNumber()).append("\n");
                 stringBuilder.append("Recipient: ").append(m.recipient).append("\n");
                 stringBuilder.append("Message: ").append(m.messageText).append("\n");
             }
@@ -528,8 +542,13 @@ public class Messenger_App {
             
             return stringBuilder.toString();
         }
-        
+       
+        // Returns the details of the stored messages
         public static String printStoredMessages() {
+            if (storedMessages.isEmpty()) {
+                return "No messages stored.";
+            }
+            
             StringBuilder stringBuilder = new StringBuilder();
             
             for (Message m : storedMessages) {
@@ -586,7 +605,9 @@ public class Messenger_App {
             }
         }
         
+        // Displays the longest stored message (message with the highest number of characters)
         public static void displayLongestStoredMessage() {
+            // Display appropriate message if there are no stored messages
             if (storedMessages.isEmpty()){
                 JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
@@ -595,34 +616,45 @@ public class Messenger_App {
             
             String longestMessage = "";
             
+            // Loop through the ArrayList
             for (Message m : storedMessages) {
+                // If the message in the current iteration is longer than the current longest message,
+                // it becomes the new longest message
                 if (m.messageText.length() > longestMessage.length()) {
                     longestMessage = m.messageText;
                 }
             }
             
+            // Display the longest message
             JOptionPane.showMessageDialog(null, "The longest stored message is:\n" +
                                           longestMessage, "Stored Messages", JOptionPane.PLAIN_MESSAGE);
         }
         
+        // Searchs for a message using the Message ID
         public static void searchMessageID() {
+            // Display appropriate message if there are no stored messages
             if (storedMessages.isEmpty()){
                 JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             
+            // Flag that indicates whether or not the message was found
             boolean flag = false;
             String searchID = "";
 
+            // Menu continues to display unless the user gives a valid value
             while (true) {
                 searchID = JOptionPane.showInputDialog(null, "Enter the Message ID of the message you'd like to search for.",
                                                               "Stored Messages", JOptionPane.PLAIN_MESSAGE);
 
+                // Returns to the previous menu if the user clicks "Cancel" or the "X" button
                 if (searchID == null) {
                     return;
                 } 
 
+                // Exit loop if the input Message ID is 10 characters long.
+                // Display a message if it is not 10 characters long.
                 if (searchID.length() == 10) {
                     break;
                 } else {
@@ -631,7 +663,9 @@ public class Messenger_App {
                 }
             }
             
+            // Loop through the ArrayList
             for (Message m : storedMessages) {
+                // If any stored message matches the Message ID, display that message and exit the loop
                 if (searchID.equals(m.messageID)) {
                     flag = true;
                     JOptionPane.showMessageDialog(null, "Message found!\n\nRecipient: " + m.recipient +
@@ -640,32 +674,39 @@ public class Messenger_App {
                 }
             }
 
+            // Display an appropriate message if the Message ID was not found
             if (!flag) {
-                JOptionPane.showMessageDialog(null, "Message with ID of " + searchID + " does not exist.",
+                JOptionPane.showMessageDialog(null, "Message with ID of " + searchID + " was not found.",
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
             }
         }
         
+        // Searches for messages based on the phone number of the message recipient
         public static void searchRecipientMessages() {
+            // Display appropriate message if there are no stored messages
             if (storedMessages.isEmpty()){
                 JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             
+            // StringBuilder used to creat the final output string
             StringBuilder stringBuilder = new StringBuilder();
             boolean flag = false;
             String searchRecipient = "";
 
+            // Menu continues to display unless the user gives a valid value
             while (true) {
                 searchRecipient = JOptionPane.showInputDialog(null, "Enter the number of a recipient to see the messages " +
                                                               "you've stored for them (e.g. +27XXXXXXXXX).",
                                                               "Stored Messages", JOptionPane.PLAIN_MESSAGE);
 
+                // Returns to the previous menu if the user clicks "Cancel" or the "X" button
                 if (searchRecipient == null) {
                     return;
                 }
 
+                // Validates the input phone number using the checkRecipientCell method
                 if (checkRecipientCell(searchRecipient).equals("Cell phone number successfully captured.")) {
                     break;
                 } else {
@@ -674,7 +715,10 @@ public class Messenger_App {
                 }
             }
             
+            // Loop through ArrayList again
             for (Message m : storedMessages) {
+                // If the phone number of the searched recipient matches the stored values,
+                // add the details of that message to the output string
                 if (searchRecipient.equals(m.recipient)) {
                     flag = true;
                     
@@ -689,15 +733,19 @@ public class Messenger_App {
             stringBuilder.append("-----------------------------");
             
             if (flag) {
+                // Display the messages if any were found
                 JOptionPane.showMessageDialog(null, "Displaying messages stored for " + searchRecipient + ".\n\n" + stringBuilder.toString(),                                            
                                               "Stored Messages", JOptionPane.INFORMATION_MESSAGE);
             } else {
+                // Display an appropriate message if no messages were found
                 JOptionPane.showMessageDialog(null, "Recipient not found.",                                            
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
             }
         }
         
+        // Deletes a stored message based on the Message Hash
         public static void deleteStoredMessage() {
+            // Display appropriate message if there are no stored messages
             if (storedMessages.isEmpty()){
                 JOptionPane.showMessageDialog(null, "There are no stored messages!",                                            
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
@@ -708,14 +756,21 @@ public class Messenger_App {
                                                             "Hint: A Message Hash looks like this -> 00:1:FIRSTLAST",
                                                             "Stored Messages", JOptionPane.PLAIN_MESSAGE);
             
+            // Returns to the previous menu if the user clicks "Cancel" or the "X" button
             if (searchHash == null) {
                 return;
             }
             
+            // The removeIf function removes an object from an ArrayList and simultaneously returns
+            // a boolean value based on if the object was found and removed. 
+            // If the input Message Hash matches any of the Message Hashes in the ArrayList,
+            // delete it, and return a value of true
             if (storedMessages.removeIf(m -> m.messageHash.equals(searchHash))) {
+                // Deletion confirmation
                 JOptionPane.showMessageDialog(null, "Message successfully deleted!",                                            
                                               "Stored Messages", JOptionPane.INFORMATION_MESSAGE);
             } else {
+                // Appropriate message is displayed if the hash was not found
                 JOptionPane.showMessageDialog(null, "Message with hash of " + searchHash + " not found.",                                            
                                               "Stored Messages", JOptionPane.WARNING_MESSAGE);
             }        
