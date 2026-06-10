@@ -12,6 +12,10 @@ import javax.swing.JOptionPane;
 public class Messenger_App {  
     // As long as this value is true, the program will continue to run
     static boolean running = true;
+    
+    static ArrayList<Message> sentMessages = new ArrayList<>();
+    static ArrayList<Message> disregardedMessages = new ArrayList<>();
+    static ArrayList<Message> storedMessages = new ArrayList<>();
 
     public static void main(String[] args) {      
         // Declaration of ArrayList used for storing user
@@ -28,14 +32,14 @@ public class Messenger_App {
             // Parent component: null because there is no parent component
             // Message text: "Main Menu"
             // Title tex: "QuickChat"
-            // Button layout: YES_NO_CANCEL_OPTION gives three buttons to work with
+            // Button layout: DEFAULT_OPTION allows us to supply our own button options
             // Message type: the dialog box is plain
             // Icon: null = no custom icon
             // Options: changes the text on the buttons according to the array mainOptions
             // Initial value: -2
-            selection = JOptionPane.showOptionDialog(null, "Main Menu",
+            selection = JOptionPane.showOptionDialog(null, "Welcome to QuickChat!",
                                                      "QuickChat",
-                                                     JOptionPane.YES_NO_CANCEL_OPTION,
+                                                     JOptionPane.DEFAULT_OPTION,
                                                      JOptionPane.PLAIN_MESSAGE,
                                                      null, mainOptions, -2);
 
@@ -102,10 +106,9 @@ public class Messenger_App {
                     Login.registerUser("RegisterSuccess");
                     
                     // User is prompted to log in immediately after registering (uses the promptLogin method)
-                    JOptionPane.showMessageDialog(null, "Welcome, " + username + ". It is great to see you!\nRedirecting to login page...",
+                    JOptionPane.showMessageDialog(null, "Welcome, " + username + ". It is great to see you!\n\nRedirecting to login page...",
                                                   "QuickChat", JOptionPane.PLAIN_MESSAGE);
                     promptLogin(users);
-                    break;
                 }
                 case 1 -> {
                     // Checks if the ArrayList is empty (no registered users), otherwise prompts login
@@ -116,7 +119,6 @@ public class Messenger_App {
                     }
                     
                     promptLogin(users);
-                    break;
                 }
                 case 2, -1 -> { // -1 is the value returned when the "X" button is clicked
                     // Terminates the program
@@ -161,47 +163,41 @@ public class Messenger_App {
     }
     
     private static void startMessaging() {
-        // User decides how many messages they want to send
-        int numMessages = 0;
-        while(numMessages <= 0) {          
-            // Input validation
-            try {
-                numMessages = Integer.parseInt(JOptionPane
-                                               .showInputDialog(null,
-                                               "Welcome to QuickChat!\n\nHow many messages would you like to send?",
-                                               "QuickChat", JOptionPane.PLAIN_MESSAGE));
-                                
-                if(numMessages <= 0) {
-                    JOptionPane.showMessageDialog(null, "Please enter a number greater than 0.", "QuickChat", JOptionPane.WARNING_MESSAGE);
-                }
-            }catch(NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Please enter a whole number.", "QuickChat", JOptionPane.WARNING_MESSAGE);
-            }
-        }
-
-        // Counts how many messages have been sent
-        int messageCounter = 0;
         // The messaging portion of the app will continue to run as long as this value is true
         boolean chatRunning = true;
         // Array that stores the options for the secondary menu
-        String[] messageOptions = {"Send messages", "Show recently sent messages", "Quit"};
+        String[] messageOptions = {"Send messages", "Stored messages", "Quit"};
  
         // Program runs until the user chooses to quit
         outerLoop: // This label is used to refer to this specific while-loop when you want to jump back to the start of it
         while(chatRunning) {        
-           int selection = JOptionPane.showOptionDialog(null, "Messaging Menu",
+           int selection = JOptionPane.showOptionDialog(null, "What would you like to do?",
                                                         "QuickChat",
-                                                        JOptionPane.YES_NO_CANCEL_OPTION,
+                                                        JOptionPane.DEFAULT_OPTION,
                                                         JOptionPane.PLAIN_MESSAGE,
                                                         null, messageOptions, -2);
 
             switch(selection) {
                 case 0 -> {
-                    // Send user back to the menu if they've reached their message limit
-                    if(messageCounter >= numMessages) {
-                        JOptionPane.showMessageDialog(null, "You have reached your message limit of " + numMessages + "!",
-                                                      "QuickChat", JOptionPane.WARNING_MESSAGE);
-                        break;
+                    // User decides how many messages they want to send
+                    int numMessages = 0;
+                    // Counts how many messages have been sent
+                    int messageCounter = 0;
+        
+                    while(numMessages <= 0) {          
+                        // Input validation
+                        try {
+                            numMessages = Integer.parseInt(JOptionPane
+                                                           .showInputDialog(null,
+                                                           "How many messages would you like to send?",
+                                                           "QuickChat", JOptionPane.PLAIN_MESSAGE));
+
+                            if(numMessages <= 0) {
+                                JOptionPane.showMessageDialog(null, "Please enter a number greater than 0.", "QuickChat", JOptionPane.WARNING_MESSAGE);
+                            }
+                        }catch(NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null, "Please enter a whole number.", "QuickChat", JOptionPane.WARNING_MESSAGE);
+                        }
                     }
  
                     // Send messages until the chosen limit
@@ -267,7 +263,7 @@ public class Messenger_App {
                         int action = JOptionPane.showOptionDialog(null, "Message ID: " + msg.getMessageID() +
                                                                   "\nMessage Hash: " + msg.getMessageHash() +  
                                                                   "\n\nWhat would you like to do?", "QuickChat",
-                                                                  JOptionPane.YES_NO_CANCEL_OPTION,
+                                                                  JOptionPane.DEFAULT_OPTION,
                                                                   JOptionPane.PLAIN_MESSAGE,
                                                                   null, messageOptions2, -2);
 
@@ -289,13 +285,53 @@ public class Messenger_App {
                     // Show summary of message details
                     JOptionPane.showMessageDialog(null, "Total messages sent: " +
                                                   Message.returnTotalMessages() + "\n" +
-                                                  Message.printMessages(),
+                                                  Message.printSentMessages(),
                                                   "QuickChat", JOptionPane.INFORMATION_MESSAGE);
                     
                 }
                 case 1 -> {
-                    // To be completed in Part 3 of the PoE
-                    JOptionPane.showMessageDialog(null, "Coming soon...", "QuickChat", JOptionPane.INFORMATION_MESSAGE);
+                    if (!storedMessages.isEmpty()) {
+                        boolean storedMessagesRunning = true;
+
+                        while (storedMessagesRunning) {
+                            String[] storedMessageOptions = {"Show longest message", "Search for a message",
+                                                             "Filter by recipient", "Delete a message",
+                                                             "Cancel"};
+
+                            int storedMessageAction = JOptionPane.showOptionDialog(null, Message.printStoredMessages(),
+                                                                                   "Stored Messages",
+                                                                                   JOptionPane.DEFAULT_OPTION,
+                                                                                   JOptionPane.PLAIN_MESSAGE,
+                                                                                   null, storedMessageOptions, -2);
+
+                            switch (storedMessageAction) {
+                                case 0 -> {
+                                    Message.displayLongestStoredMessage();
+                                }
+                                case 1 -> {
+                                    Message.searchMessageID();
+                                }
+                                case 2 -> {
+                                    Message.searchRecipientMessages();
+                                }
+                                case 3 -> {
+                                    Message.deleteStoredMessage();
+                                }
+                                case 4, -1 -> {
+                                    storedMessagesRunning = false;
+                                    continue outerLoop;
+                                }
+                                default -> {
+                                    // Invalid input error message.
+                                    System.out.println("Invalid input.");
+                                }
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "You haven't stored any messages yet.",
+                                                      "Stored Messages", JOptionPane.INFORMATION_MESSAGE);
+                        continue outerLoop;
+                    }
                 }
                 case 2, -1 -> {
                     // Terminates the program
@@ -317,7 +353,7 @@ public class Messenger_App {
     public static class Login {
         private String username;
         private String password;
-        private String phoneNumber;
+        private static String phoneNumber;
         
         // Constructor
         public Login(String username, String password, String phoneNumber){
@@ -381,6 +417,10 @@ public class Messenger_App {
         public String returnLoginStatus(boolean status){
             return status ? "\nLogin successful!" : "\nUsername or password incorrect. Please try again.";
         }
+        
+        public static String getPhoneNumber() {
+            return phoneNumber;
+        }
     }
    
     public static class Message {
@@ -388,9 +428,7 @@ public class Messenger_App {
         private int messageNumber;
         private String recipient;
         private String messageText;
-        private String messageHash;
-        // Tracks messages sent and total count
-        private static ArrayList<Message> sentMessages = new ArrayList<>();
+        private String messageHash;     
         private static int totalMessagesSent = 0;
  
         // Constructor automatically generates a message ID and message hash using methods
@@ -418,7 +456,7 @@ public class Messenger_App {
  
         // Validates recipient cell phone number
         public static String checkRecipientCell(String number) {
-            if(number != null && number.startsWith("+") && number.length() <= 13) {
+            if(number.matches("\\+27[6-8]\\d{8}")) {
                 return "Cell phone number successfully captured.";
             }else {
                 return "Cell phone number is incorrectly formatted or does not contain an " +
@@ -457,9 +495,11 @@ public class Messenger_App {
                     return "Message successfully sent.";
                 }
                 case 1 -> {
+                    disregardedMessages.add(this);
                     return "Message disregarded.";
                 }
                 case 2 -> {
+                    storedMessages.add(this);
                     storeMessage();
                     return "Message successfully stored.";
                 }
@@ -470,17 +510,33 @@ public class Messenger_App {
         }
  
         // Returns the details of the messages sent
-        public static String printMessages() {
-            if(sentMessages.isEmpty()) {
+        public static String printSentMessages() {
+            if (sentMessages.isEmpty()) {
                 return "No messages sent yet.";
             }
  
             StringBuilder stringBuilder = new StringBuilder();
             
-            for(Message m : sentMessages) {
+            for (Message m : sentMessages) {
                 stringBuilder.append("-----------------------------\n");
                 stringBuilder.append("Message ID: ").append(m.messageID).append("\n");
                 stringBuilder.append("Message Hash: ").append(m.messageHash).append("\n");
+                stringBuilder.append("Recipient: ").append(m.recipient).append("\n");
+                stringBuilder.append("Message: ").append(m.messageText).append("\n");
+            }
+            stringBuilder.append("-----------------------------");
+            
+            return stringBuilder.toString();
+        }
+        
+        public static String printStoredMessages() {
+            StringBuilder stringBuilder = new StringBuilder();
+            
+            for (Message m : storedMessages) {
+                stringBuilder.append("-----------------------------\n");
+                stringBuilder.append("Message ID: ").append(m.messageID).append("\n");
+                stringBuilder.append("Message Hash: ").append(m.messageHash).append("\n");
+                stringBuilder.append("Sender: ").append(Login.getPhoneNumber()).append("\n");
                 stringBuilder.append("Recipient: ").append(m.recipient).append("\n");
                 stringBuilder.append("Message: ").append(m.messageText).append("\n");
             }
@@ -528,6 +584,31 @@ public class Messenger_App {
             }catch (IOException e) {
                 System.out.println("Error saving message: " + e.getMessage());
             }
+        }
+        
+        public static void displayLongestStoredMessage() {
+            String longestMessage = "";
+            
+            for (Message m : storedMessages) {
+                if (m.messageText.length() > longestMessage.length()) {
+                    longestMessage = m.messageText;
+                }
+            }
+            
+            JOptionPane.showMessageDialog(null, "The longest stored message is:\n" +
+                                          longestMessage, "Stored Messages", JOptionPane.PLAIN_MESSAGE);
+        }
+        
+        public static void searchMessageID() {
+            
+        }
+        
+        public static void searchRecipientMessages() {
+            
+        }
+        
+        public static void deleteStoredMessage() {
+            
         }
  
         // Returns the message ID
